@@ -1,15 +1,14 @@
 # Hi Hello World 
- 프로그래밍에 대한 질문을 하고 답변을 받는 사이트
-
 'Hi Hello World' is a Q&A platform for professional and enthusiast programmers.  
 It features questions and answers on a wide range of topics in computer programming.
   <br><br>
 ## 프로젝트 실행 | Getting Started
 
 ``` 
+add folder
 /hhwProject/src/main/webapp/lib
 
-폴더 추가 후 jstl, jdbc jar파일 추가
+add jstl, jdbc jar file
 ``` 
 
 
@@ -21,7 +20,7 @@ It features questions and answers on a wide range of topics in computer programm
 /hhwProject/src/main/java/com/ict/hhw/member/controller/MemberController.java 
 
 public void send_mail(Member member, String subject, String message)
-your actual email address, email password of naver 입력
+fill in your actual email address, email password of naver 
 ```
 
 ![image](https://user-images.githubusercontent.com/48824321/107697432-8ee41900-6cf6-11eb-8fe4-b56801de9175.png)
