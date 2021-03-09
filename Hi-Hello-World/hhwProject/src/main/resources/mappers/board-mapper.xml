@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="boardMapper">
+
+   <resultMap type="Board" id="resultBoard">
+      <id column="bid" property="bid" />
+      <result column="btype" property="btype" />
+      <result column="bwriter" property="bwriter" />
+      <result column="btitle" property="btitle" />
+      <result column="bcontent" property="bcontent" />
+      <result column="b_original_filename" property="b_original_filename" />
+      <result column="b_rename_filename" property="b_rename_filename" />
+      <result column="b_create_date" property="b_create_date" />
+      <result column="b_modfiy_date" property="b_modfiy_date" />
+      <result column="bcount" property="bcount" />
+      <result column="b_rcount" property="b_rcount" />
+      <result column="bstatus" property="bstatus" />
+   </resultMap>
+   
+   
+    <resultMap type="BoardList" id="resultBoardList">
+     <id column="bid" property="bid" />
+      <result column="b_ref_bid" property="b_ref_bid" />
+      <result column="btype" property="btype" />
+      <result column="bwriter" property="bwriter" />
+      <result column="btitle" property="btitle" />
+      <result column="b_original_filename" property="b_original_filename" />
+      <result column="b_rename_filename" property="b_rename_filename" />
+      <result column="b_create_date" property="b_create_date" />
+      <result column="bcount" property="bcount" />
+      <result column="grade" property="grade" />
+	</resultMap>
+
+
+   <resultMap type="Board" id="resultTop3">
+      <id column="bid" property="bid" />
+      <result column="btype" property="btype" />
+      <result column="bwriter" property="bwriter" />
+      <result column="btitle" property="btitle" />
+      <result column="b_create_date" property="b_create_date" />
+      <result column="bcount" property="bcount" />
+   </resultMap>
+
+   <!-- 비교연산자를 쿼리문에 그냥 사용하면, 마이바티스에서 태그 앨리먼트의 꺽쇠괄호(<,>,&)와 혼동하는 문제가 발생할 수 있음 
+      이 문제를 미리 방지하기 위해 xml 코드 중 xml parser에 의해 해석하지 말고 문장 그대로 해석하라는 뜻으로 <![CDATA 
+      쿼리문장 ]]> 사용함 -->
+      
+  <!--  
+    <update id="addInsertReply" parameterType="_int">
+      UPDATE BOARD
+		 SET B_RCOUNT = (SELECT COUNT(*) 
+                           FROM B_REPLY R 
+                       GROUP BY R.B_REF_BID 
+                         HAVING R.B_REF_BID = ${ bid })
+   </update> -->
+   
+   
+	<!-- Member, Board, Reply 조인 -->
+	<select id="selectNewBoardList" parameterType="com.ict.hhw.board.model.vo.BoardPage" resultMap="resultBoardList">
+      <![CDATA[
+        SELECT *
+          FROM  (
+                 SELECT ROWNUM RNUM
+               , BID
+               , B_REF_BID
+               , BTYPE
+               , BTITLE
+               , BWRITER
+               , B_ORIGINAL_FILENAME
+               , B_RENAME_FILENAME
+               , B_CREATE_DATE
+               , BCOUNT
+               , GRADE
+          FROM  ( SELECT B.BID
+                        ,(SELECT COUNT(*) FROM B_REPLY R LEFT JOIN BOARD B ON B.BID = R.B_REF_BID WHERE R.B_STATUS = 'Y') AS B_REF_BID
+                		, B.BTYPE
+                		, B.BTITLE
+                		, B.BWRITER
+                		, B.B_ORIGINAL_FILENAME
+                		, B.B_RENAME_FILENAME
+                		, B.B_CREATE_DATE
+                		, B.BCOUNT
+                		, M.GRADE
+           FROM BOARD B
+           LEFT JOIN B_REPLY R ON B.B_RCOUNT = R.B_REF_BID
+           LEFT JOIN MEMBER M ON B.BWRITER = M.NICKNAME
+           WHERE B.BSTATUS = 'Y'
+          ORDER BY B.BID DESC))
+          WHERE RNUM >=  #{ startRow }
+          AND RNUM <= #{ endRow }
+                ]]>
+   </select>
+	
+
+   <!-- 조회수 top3 게시글 리스팅 -->
+   <select id="selectTop3" resultMap="resultBoard">
+    <![CDATA[
+      SELECT *
+        FROM (
+      SELECT  ROWNUM RNUM
+            , BID
+            , BTYPE
+            , BTITLE
+            , BWRITER
+            , B_CREATE_DATE
+            , BCOUNT
+        FROM (
+      SELECT *
+        FROM BOARD 
+       ORDER BY BCOUNT DESC
+              ))
+       WHERE RNUM >= 1 
+         AND RNUM <= 5
+            ]]>
+   </select>
+
+  <update id="updateBCount" parameterType="_int">
+      update board
+         set bcount = bcount + 1
+         where bid = #{ BID }
+   </update>
+
+
+   <select id="selectBoard" parameterType="_int" resultMap="resultBoard">
+      select *
+        from board
+       where bid = #{ BID }
+   </select>
+
+   <select id="getListCount" resultType="_int">
+      select count(*)
+        from board
+   </select>
+
+   
+   <insert id="insertBoard" parameterType="Board">
+      
+      INSERT 
+        INTO BOARD
+        
+      <if test="b_original_filename != null"><!-- 첨부파일이 있을 때 -->
+      values (
+              seq_bid.nextval
+            , #{ btype }
+            , #{ bwriter }
+            , #{ btitle }
+            , #{ bcontent }
+            , #{ b_original_filename }
+            , #{ b_rename_filename }
+            , sysdate
+            , sysdate
+            , default
+            , default
+            , default
+             )
+      </if>
+      <if test="b_original_filename == null"><!-- 첨부파일이 없을 때 -->
+      values (
+              seq_bid.nextval
+             , #{ btype }
+             , #{ bwriter }
+             , #{ btitle }
+             , #{ bcontent }
+             , null
+             , null
+             , sysdate
+             , sysdate
+             , default
+           	 , default
+             , default
+             )
+      </if>
+   </insert>
+   
+   <update id="updateBoard" parameterType="Board">
+      update board
+         set   btitle = #{ btitle }
+             , bcontent = #{ bcontent }
+             , b_modfiy_date = sysdate
+         <if test="b_original_filename == null">
+            , b_original_filename = null
+            , b_rename_filename = null
+         </if>
+         <if test="b_original_filename != null">
+            , b_original_filename = #{ b_original_filename }
+            , b_rename_filename = #{ b_rename_filename }
+         </if>
+       where bid = #{ bid }
+   </update>
+   
+   
+   <update id="changeBstatusN" parameterType="_int">
+      update board
+         set   bstatus = 'N'
+             , b_modfiy_date = sysdate
+       where bid = #{ bid }
+   </update>
+   
+   
+   <select id="searchTitle" parameterType="com.ict.hhw.common.SearchAndPage" resultMap="resultBoardList">
+         <![CDATA[
+        SELECT *
+          FROM  (
+                 SELECT ROWNUM RNUM
+               , BID
+               , B_REF_BID
+               , BTYPE
+               , BTITLE
+               , BWRITER
+               , B_ORIGINAL_FILENAME
+               , B_RENAME_FILENAME
+               , B_CREATE_DATE
+               , BCOUNT
+               , GRADE
+          FROM  ( SELECT B.BID
+                        ,(SELECT COUNT(*) FROM B_REPLY R LEFT JOIN BOARD B ON B.BID = R.B_REF_BID WHERE R.B_STATUS = 'Y') AS B_REF_BID
+                		, B.BTYPE
+                		, B.BTITLE
+                		, B.BWRITER
+                		, B.B_ORIGINAL_FILENAME
+                		, B.B_RENAME_FILENAME
+                		, B.B_CREATE_DATE
+                		, B.BCOUNT
+                		, M.GRADE
+           FROM BOARD B
+           LEFT JOIN B_REPLY R ON B.B_RCOUNT = R.B_REF_BID
+           LEFT JOIN MEMBER M ON B.BWRITER = M.NICKNAME
+           WHERE B.BSTATUS = 'Y'
+           AND BTITLE LIKE '%' || #{ keyword } || '%'
+          ORDER BY B.BID DESC))
+          WHERE RNUM >=  #{ startRow }
+          AND RNUM <= #{ endRow }
+         ]]>
+   </select>
+   
+   <select id="searchWriter" parameterType="com.ict.hhw.common.SearchAndPage" resultMap="resultBoardList">
+         <![CDATA[
+		SELECT *
+          FROM  (
+                 SELECT ROWNUM RNUM
+               , BID
+               , B_REF_BID
+               , BTYPE
+               , BTITLE
+               , BWRITER
+               , B_ORIGINAL_FILENAME
+               , B_RENAME_FILENAME
+               , B_CREATE_DATE
+               , BCOUNT
+               , GRADE
+          FROM  ( SELECT B.BID
+                        ,(SELECT COUNT(*) FROM B_REPLY R LEFT JOIN BOARD B ON B.BID = R.B_REF_BID WHERE R.B_STATUS = 'Y') AS B_REF_BID
+                		, B.BTYPE
+                		, B.BTITLE
+                		, B.BWRITER
+                		, B.B_ORIGINAL_FILENAME
+                		, B.B_RENAME_FILENAME
+                		, B.B_CREATE_DATE
+                		, B.BCOUNT
+                		, M.GRADE
+           FROM BOARD B
+           LEFT JOIN B_REPLY R ON B.B_RCOUNT = R.B_REF_BID
+           LEFT JOIN MEMBER M ON B.BWRITER = M.NICKNAME
+           WHERE B.BSTATUS = 'Y'
+             AND B.BWRITER LIKE '%' || #{ keyword } || '%'
+          ORDER BY B.BID DESC))
+          WHERE RNUM >=  #{ startRow }
+          AND RNUM <= #{ endRow }
+                ]]>
+   </select>
+   
+   <select id="searchDate" parameterType="com.ict.hhw.common.SearchAndPage" resultMap="resultBoardList">
+         <![CDATA[
+         SELECT *
+          FROM  (
+                 SELECT ROWNUM RNUM
+               , BID
+               , B_REF_BID
+               , BTYPE
+               , BTITLE
+               , BWRITER
+               , B_ORIGINAL_FILENAME
+               , B_RENAME_FILENAME
+               , B_CREATE_DATE
+               , BCOUNT
+               , GRADE
+          FROM  ( SELECT B.BID
+                        ,(SELECT COUNT(*) FROM B_REPLY R LEFT JOIN BOARD B ON B.BID = R.B_REF_BID WHERE R.B_STATUS = 'Y') AS B_REF_BID
+                		, B.BTYPE
+                		, B.BTITLE
+                		, B.BWRITER
+                		, B.B_ORIGINAL_FILENAME
+                		, B.B_RENAME_FILENAME
+                		, B.B_CREATE_DATE
+                		, B.BCOUNT
+                		, M.GRADE
+           FROM BOARD B
+           LEFT JOIN B_REPLY R ON B.B_RCOUNT = R.B_REF_BID
+           LEFT JOIN MEMBER M ON B.BWRITER = M.NICKNAME
+           WHERE B.BSTATUS = 'Y'
+	         AND B.B_CREATE_DATE BETWEEN #{ begin }
+             AND #{ end }
+          ORDER BY B.BID DESC))
+          WHERE RNUM >=  #{ startRow }
+          AND RNUM <= #{ endRow }
+               ]]>
+   </select>
+
+   <select id="getSearchTitleListCount" parameterType="string" resultType="_int">
+      select count(*)
+        from board
+       where btitle like '%' || #{ keyword } || '%'
+   </select>
+   
+   <select id="getSearchWriterListCount" parameterType="string" resultType="_int">
+      select count(*) 
+        from board
+       where bwriter like '%' || #{ keyword } || '%'
+   </select>
+   
+   <select id="getSearchDateListCount" parameterType="com.ict.hhw.common.SearchDate" resultType="_int">
+      select count(*) 
+        from board
+       where b_create_date
+       between #{ begin }
+           and #{ end }
+   </select>
+</mapper>
