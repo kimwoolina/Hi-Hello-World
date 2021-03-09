@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd" >
+<configuration>
+	<settings>
+		<setting name="jdbcTypeForNull" value="NULL"/>
+	</settings>
+
+	<typeAliases>
+		<typeAlias type="com.ict.hhw.member.model.vo.Member" alias="Member"/>
+		<typeAlias type="com.ict.hhw.qa.model.vo.Qa" alias="Qa"/>
+		<typeAlias type="com.ict.hhw.qa.model.vo.Qar" alias="Qar"/>
+		<typeAlias type="com.ict.hhw.notice.model.vo.Notice" alias="Notice"/>
+		<typeAlias type="com.ict.hhw.board.model.vo.Board" alias="Board"/>
+		<typeAlias type="com.ict.hhw.board.model.vo.BoardList" alias="BoardList"/>
+		<typeAlias type="com.ict.hhw.board_reply.model.vo.B_Reply" alias="B_Reply"/>
+		<typeAlias type="com.ict.hhw.progress.model.vo.Progress" alias="Progress"/>
+		<typeAlias type="com.ict.hhw.progress.model.vo.QaProgress" alias="QaProgress"/>
+		<typeAlias type="com.ict.hhw.progress.model.vo.P_board" alias="P_board"/>
+		<typeAlias type="com.ict.hhw.pboard_reply.model.vo.P_reply" alias="P_reply"/>
+		<typeAlias type="com.ict.hhw.blame.model.vo.Blame" alias="Blame"/>
+		<typeAlias type="com.ict.hhw.payment.model.vo.Payment" alias="Payment"/>
+		<typeAlias type="com.ict.hhw.review.model.vo.Review" alias="Review"/>
+		<typeAlias type="com.ict.hhw.review_reply.model.vo.Re_reply" alias="Re_reply"/>
+	</typeAliases>
+	
+	<mappers>
+		<mapper resource="mappers/member-mapper.xml"/>
+		<mapper resource="mappers/qa-mapper.xml"/>
+		<mapper resource="mappers/qar-mapper.xml"/>
+		<mapper resource="mappers/notice-mapper.xml"/>
+		<mapper resource="mappers/board-mapper.xml"/>
+		<mapper resource="mappers/b_reply-mapper.xml"/>
+		<mapper resource="mappers/progress-mapper.xml"/>
+		<mapper resource="mappers/pboard-mapper.xml"/>
+		<mapper resource="mappers/preply-mapper.xml"/>
+		<mapper resource="mappers/blame-mapper.xml"/>
+		<mapper resource="mappers/payment-mapper.xml"/>
+		<mapper resource="mappers/review-mapper.xml"/>
+	</mappers>
+</configuration>
