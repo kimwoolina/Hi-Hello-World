@@ -30,7 +30,7 @@ fill in your actual email address, email password of naver
 
 ## 개발 환경 | Development Environment
 - Operating System : Microsoft Window 10
-- IDE : Spring Tool Suite 3 (Version: 3.9.13.RELEASE)
+- IDE : Spring Tool Suite 3 (3.9.13.RELEASE)
 - Web Application Server : Apache Tomcat 8.5
 - Database : Oracle 11g Express Edition
 - Framework & Open API : Spring, MyBatis, Ajax, jQuery
